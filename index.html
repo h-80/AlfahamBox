@@ -3,43 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tik Tak</title>
+    <title>Tik Tak - تيك تاك</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: #000; color: white; overflow: hidden; font-family: sans-serif; }
-        #login-screen { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .g-btn { background: white; color: black; padding: 15px 30px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; }
-        .top-nav { position: absolute; top: 25px; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 100; font-weight: bold; }
+        :root { --main: #fe2c55; --sub: #25f4ee; }
+        body, html { margin: 0; padding: 0; height: 100%; background: #000; color: white; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* شاشة الدخول */
+        #login-screen { position: fixed; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .logo { font-size: 60px; font-weight: bold; margin-bottom: 20px; letter-spacing: -2px; }
+        .g-btn { background: white; color: black; padding: 15px 35px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-size: 16px; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+        .g-btn:hover { transform: scale(1.05); }
+
+        /* التبويبات العلوية */
+        .top-nav { position: absolute; top: 25px; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 100; font-size: 18px; font-weight: bold; text-shadow: 2px 2px 5px rgba(0,0,0,1); }
+        .tab { opacity: 0.7; cursor: pointer; }
+        .tab.active { opacity: 1; border-bottom: 2px solid white; }
+
+        /* الفيديوهات */
         .swiper { width: 100%; height: 100vh; }
+        .video-box { position: relative; width: 100%; height: 100%; }
         video { width: 100%; height: 100%; object-fit: cover; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 60px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; z-index: 100; }
-        .add-btn { background: linear-gradient(to right, #25f4ee, #fe2c55); padding: 4px 15px; border-radius: 8px; color: black; font-weight: bold; font-size: 22px; }
+
+        /* الأزرار الجانبية */
+        .side-bar { position: absolute; right: 12px; bottom: 120px; display: flex; flex-direction: column; align-items: center; gap: 20px; z-index: 50; }
+        .icon-btn { text-align: center; cursor: pointer; }
+        .icon-btn i { font-size: 30px; }
+        .icon-btn span { font-size: 12px; display: block; font-weight: bold; }
+        .user-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid white; margin-bottom: 10px; }
+
+        /* معلومات الفيديو */
+        .v-meta { position: absolute; bottom: 90px; left: 15px; z-index: 50; max-width: 75%; }
+        .v-username { font-weight: bold; font-size: 18px; margin-bottom: 5px; display: block; }
+
+        /* القائمة السفلية */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 0.5px solid #333; z-index: 100; }
+        .nav-item { font-size: 20px; cursor: pointer; color: #888; }
+        .nav-item.active { color: white; }
+        .plus-btn { background: linear-gradient(to right, var(--sub), var(--main)); padding: 5px 18px; border-radius: 10px; color: black; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h1 style="font-size: 50px; margin-bottom: 30px;">Tik Tak</h1>
-        <button class="g-btn" id="loginBtn">المتابعة باستخدام Google</button>
+        <div class="logo">Tik Tak</div>
+        <button class="g-btn" id="loginBtn">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+            تسجيل دخول بالجيميل
+        </button>
     </div>
 
-    <div class="top-nav"><span>اتابعه</span> | <span style="border-bottom: 2px solid white;">لك</span> | <span>استكشف</span></div>
+    <div class="top-nav">
+        <div class="tab">اتابعه</div>
+        <div class="tab active">لك</div>
+        <div class="tab">استكشف</div>
+    </div>
 
     <div class="swiper mySwiper">
-        <div class="swiper-wrapper" id="video-feed"></div>
+        <div class="swiper-wrapper" id="feed">
+            </div>
     </div>
 
     <div class="bottom-nav">
-        <div>🏠</div><div>👥</div>
-        <div onclick="document.getElementById('upload').click()"><span class="add-btn">+</span></div>
-        <div>💬</div><div>👤</div>
+        <div class="nav-item active">🏠</div>
+        <div class="nav-item">👥</div>
+        <div class="nav-item" onclick="document.getElementById('up').click()"><span class="plus-btn">+</span></div>
+        <div class="nav-item">💬</div>
+        <div class="nav-item">👤</div>
     </div>
 
-    <input type="file" id="upload" hidden accept="video/*">
+    <input type="file" id="up" hidden accept="video/*">
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
@@ -57,42 +94,60 @@
         const db = getDatabase(app);
         const storage = getStorage(app);
 
-        // تعديل: استخدام Redirect بدلاً من Popup لحل مشكلة المربع الأبيض
+        // تسجيل الدخول بالنافذة المنبثقة (الأفضل للمتصفح)
         document.getElementById('loginBtn').onclick = () => {
             const provider = new GoogleAuthProvider();
-            signInWithRedirect(auth, provider);
+            signInWithPopup(auth, provider).then(() => {
+                document.getElementById('login-screen').style.display = 'none';
+            }).catch(err => alert("حدث خطأ: تأكد من إضافة الدومين في فيربيس"));
         };
-
-        // فحص نتيجة تسجيل الدخول بعد العودة للصفحة
-        getRedirectResult(auth).catch((error) => {
-            console.error("خطأ في الدخول:", error);
-        });
 
         onAuthStateChanged(auth, user => {
             if(user) document.getElementById('login-screen').style.display = 'none';
         });
 
+        // جلب البيانات من قاعدة بيانات الفاهم
         onValue(ref(db, 'videos'), snap => {
-            const feed = document.getElementById('video-feed');
+            const feed = document.getElementById('feed');
             feed.innerHTML = '';
             snap.forEach(child => {
                 const v = child.val();
                 feed.insertAdjacentHTML('afterbegin', `
                     <div class="swiper-slide">
-                        <video src="${v.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
+                        <div class="video-box">
+                            <video src="${v.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
+                            <div class="side-bar">
+                                <img src="${v.userPhoto || 'https://via.placeholder.com/50'}" class="user-avatar">
+                                <div class="icon-btn">❤️<span>0</span></div>
+                                <div class="icon-btn">💬<span>0</span></div>
+                                <div class="icon-btn">🔗<span>شارك</span></div>
+                            </div>
+                            <div class="v-meta">
+                                <span class="v-username">@${v.userName}</span>
+                                <div>مقطع جديد على تيك تاك 🎥</div>
+                            </div>
+                        </div>
                     </div>`);
             });
             new Swiper(".mySwiper", { direction: "vertical" });
         });
 
-        document.getElementById('upload').onchange = async (e) => {
+        // رفع الفيديو
+        document.getElementById('up').onchange = async (e) => {
             const file = e.target.files[0];
             if(!file) return;
-            alert("جاري الرفع...");
-            const fileRef = sRef(storage, 'v/' + Date.now());
+            alert("يتم الرفع الآن...");
+            const fileRef = sRef(storage, 'tiktak/' + Date.now());
             await uploadBytes(fileRef, file);
             const url = await getDownloadURL(fileRef);
-            await set(push(ref(db, 'videos')), { url: url, userName: auth.currentUser.displayName });
+            
+            const newVideo = push(ref(db, 'videos'));
+            await set(newVideo, {
+                url, userName: auth.currentUser.displayName,
+                userPhoto: auth.currentUser.photoURL,
+                userId: auth.currentUser.uid,
+                createdAt: Date.now()
+            });
             alert("تم النشر!");
         };
     </script>
