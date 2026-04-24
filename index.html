@@ -15,18 +15,22 @@
         :root { --main: #fe2c55; --sub: #25f4ee; }
         body, html { margin: 0; padding: 0; height: 100%; background: #000; color: white; overflow: hidden; font-family: sans-serif; }
         
-        .top-nav { position: absolute; top: 20px; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 1000; font-weight: bold; text-shadow: 1px 1px 3px #000; }
+        /* التبويبات العلوية */
+        .top-nav { position: absolute; top: 20px; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 1000; font-weight: bold; }
         .tab { cursor: pointer; opacity: 0.6; }
         .tab.active { opacity: 1; border-bottom: 3px solid white; }
 
-        .swiper { width: 100%; height: 100vh; }
-        .swiper-slide { position: relative; width: 100%; height: 100%; background: #000; }
+        /* حاوية الفيديوهات */
+        .swiper { width: 100%; height: 100vh; background: #000; }
+        .swiper-slide { position: relative; width: 100%; height: 100%; }
         video { width: 100%; height: 100%; object-fit: cover; }
 
-        .side-bar { position: absolute; right: 12px; bottom: 130px; display: flex; flex-direction: column; align-items: center; gap: 20px; z-index: 100; }
-        .icon-btn { font-size: 32px; cursor: pointer; text-align: center; text-shadow: 0 0 5px #000; }
+        /* الأزرار الجانبية */
+        .side-bar { position: absolute; right: 12px; bottom: 130px; display: flex; flex-direction: column; align-items: center; gap: 22px; z-index: 100; }
+        .icon-btn { font-size: 32px; cursor: pointer; text-align: center; }
         .icon-btn span { font-size: 13px; display: block; }
 
+        /* القائمة السفلية */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; z-index: 1000; }
         .plus-btn { background: linear-gradient(to right, var(--sub), var(--main)); padding: 4px 20px; border-radius: 10px; color: black; font-weight: bold; font-size: 28px; cursor: pointer; }
         
@@ -35,7 +39,7 @@
 </head>
 <body>
 
-    <div id="loader">جاري تشغيل تيك تاك... 🎬</div>
+    <div id="loader">جاري الاتصال... 🎬</div>
 
     <div class="top-nav">
         <div class="tab">اتابعه</div>
@@ -49,34 +53,36 @@
 
     <div class="bottom-nav">
         <div onclick="location.reload()">🏠</div>
-        <div>👥</div>
-        <div onclick="document.getElementById('camera').click()"><span class="plus-btn">+</span></div>
-        <div>💬</div>
+        <div onclick="document.getElementById('file-input').click()"><span class="plus-btn">+</span></div>
         <div>👤</div>
     </div>
 
-    <input type="file" id="camera" hidden accept="video/*" capture="camcorder">
+    <input type="file" id="file-input" hidden accept="video/*" capture="environment">
 
     <script>
-        var config = {
+        // إعدادات Firebase (مشروعك في آسيا)
+        var firebaseConfig = {
             apiKey: "AIzaSyANGnbMj4S6xS5Xkl7dSIqTXwqYloy55Mw",
             authDomain: "tik-tak-cdfad.firebaseapp.com",
             databaseURL: "https://tik-tak-cdfad-default-rtdb.asia-southeast1.firebasedatabase.app/",
             projectId: "tik-tak-cdfad",
             storageBucket: "tik-tak-cdfad.firebasestorage.app"
         };
-        firebase.initializeApp(config);
+
+        // تهيئة Firebase
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         var db = firebase.database();
         var st = firebase.storage();
 
+        // دالة جلب الفيديوهات
         db.ref('videos').on('value', function(snap) {
             var feed = document.getElementById('feed');
             if (snap.exists()) {
                 document.getElementById('loader').style.display = 'none';
-                var content = '';
+                var html = '';
                 snap.forEach(function(child) {
                     var v = child.val();
-                    content += `
+                    html += `
                         <div class="swiper-slide">
                             <video src="${v.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
                             <div class="side-bar">
@@ -84,27 +90,43 @@
                                 <div class="icon-btn">💬<span>0</span></div>
                                 <div class="icon-btn">🔗</div>
                             </div>
-                            <div style="position:absolute; bottom:90px; left:15px; font-weight:bold;">@${v.user || 'حيدر_الفاهم'}</div>
+                            <div style="position:absolute; bottom:85px; left:15px; font-weight:bold; text-shadow:1px 1px 2px #000;">@${v.user || 'حيدر_الفاهم'}</div>
                         </div>`;
                 });
-                feed.innerHTML = content;
-                new Swiper(".mySwiper", { direction: "vertical" });
+                feed.innerHTML = html;
+                
+                // تفعيل السحب والتشغيل التلقائي
+                var swiper = new Swiper(".mySwiper", { 
+                    direction: "vertical",
+                    on: {
+                        slideChange: function() {
+                            document.querySelectorAll('video').forEach(v => v.pause());
+                            var activeVid = this.slides[this.activeIndex].querySelector('video');
+                            if(activeVid) activeVid.play();
+                        }
+                    }
+                });
             } else {
-                document.getElementById('loader').innerText = "ارفع فيديو الآن!";
+                document.getElementById('loader').innerText = "لا توجد مقاطع، كن أول من ينشر!";
             }
         });
 
-        document.getElementById('camera').onchange = function(e) {
+        // دالة الرفع (كاميرا + استوديو)
+        document.getElementById('file-input').onchange = function(e) {
             var file = e.target.files[0];
             if(!file) return;
-            alert("بدأ الرفع.. انتظر قليلاً ✅");
-            var ref = st.ref().child('v/' + Date.now());
+            
+            alert("بدأ الرفع.. يرجى الانتظار ⏳");
+            var ref = st.ref().child('v/' + Date.now() + '.mp4');
+            
             ref.put(file).then(function(s) {
                 return s.ref.getDownloadURL();
             }).then(function(url) {
-                db.ref('videos').push({ url: url, user: "Haider" });
-                alert("تم النشر!");
+                db.ref('videos').push({ url: url, user: "Haider", time: Date.now() });
+                alert("تم النشر بنجاح! ✅");
                 location.reload();
+            }).catch(function(err) {
+                alert("حدث خطأ، تأكد من إعدادات القواعد في Firebase");
             });
         };
     </script>
