@@ -2,132 +2,123 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tik Tak - Alfaham</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>واتساب الفاهم - النسخة الجديدة</title>
     
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --main: #fe2c55; --sub: #25f4ee; }
-        body, html { margin: 0; padding: 0; height: 100%; background: #000; color: white; overflow: hidden; font-family: sans-serif; }
-        
-        /* التبويبات العلوية */
-        .top-nav { position: absolute; top: 20px; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 1000; font-weight: bold; }
-        .tab { cursor: pointer; opacity: 0.6; }
-        .tab.active { opacity: 1; border-bottom: 3px solid white; }
-
-        /* حاوية الفيديوهات */
-        .swiper { width: 100%; height: 100vh; background: #000; }
-        .swiper-slide { position: relative; width: 100%; height: 100%; }
-        video { width: 100%; height: 100%; object-fit: cover; }
-
-        /* الأزرار الجانبية */
-        .side-bar { position: absolute; right: 12px; bottom: 130px; display: flex; flex-direction: column; align-items: center; gap: 22px; z-index: 100; }
-        .icon-btn { font-size: 32px; cursor: pointer; text-align: center; }
-        .icon-btn span { font-size: 13px; display: block; }
-
-        /* القائمة السفلية */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: #000; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; z-index: 1000; }
-        .plus-btn { background: linear-gradient(to right, var(--sub), var(--main)); padding: 4px 20px; border-radius: 10px; color: black; font-weight: bold; font-size: 28px; cursor: pointer; }
-        
-        #loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 500; color: var(--sub); }
+        :root { --green: #075e54; --white: #ffffff; --light-green: #dcf8c6; }
+        body { font-family: sans-serif; margin: 0; background: #e5ddd5; }
+        #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #fff; }
+        input { width: 80%; padding: 12px; margin: 10px; border: 1px solid #ccc; border-radius: 5px; text-align: center; font-size: 16px; }
+        button { width: 85%; padding: 12px; background: #25d366; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        #chat-screen { display: none; height: 100vh; flex-direction: column; }
+        .header { background: var(--green); color: white; padding: 15px; font-size: 18px; font-weight: bold; }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 8px 12px; border-radius: 10px; max-width: 75%; font-size: 15px; position: relative; }
+        .sent { align-self: flex-end; background: var(--light-green); }
+        .received { align-self: flex-start; background: var(--white); }
+        .input-bar { background: #f0f0f0; padding: 10px; display: flex; gap: 10px; }
+        #m-input { flex: 1; border-radius: 20px; border: none; padding: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="loader">جاري الاتصال... 🎬</div>
-
-    <div class="top-nav">
-        <div class="tab">اتابعه</div>
-        <div class="tab active">لك</div>
-        <div class="tab">استكشف</div>
+    <div id="auth-screen">
+        <div style="font-size: 28px; color: #25d366; font-weight: bold; margin-bottom: 20px;">الفاهم واتساب</div>
+        <div id="phone-box">
+            <input type="text" id="phone" placeholder="+964 000 000 0000">
+            <button id="send-code">إرسال الرمز 💬</button>
+        </div>
+        <div id="code-box" style="display:none;">
+            <input type="text" id="code" placeholder="أدخل الرمز المستلم">
+            <button id="verify-code">تأكيد ودخول ✅</button>
+        </div>
+        <div id="recaptcha-container"></div>
     </div>
 
-    <div class="swiper mySwiper">
-        <div class="swiper-wrapper" id="feed"></div>
+    <div id="chat-screen">
+        <div class="header">الفاهم واتساب - متصل الآن</div>
+        <div id="messages"></div>
+        <div class="input-bar">
+            <input type="text" id="m-input" placeholder="اكتب رسالتك...">
+            <button id="send-msg" style="width: 50px; border-radius: 50%; background: #075e54;">➤</button>
+        </div>
     </div>
-
-    <div class="bottom-nav">
-        <div onclick="location.reload()">🏠</div>
-        <div onclick="document.getElementById('file-input').click()"><span class="plus-btn">+</span></div>
-        <div>👤</div>
-    </div>
-
-    <input type="file" id="file-input" hidden accept="video/*" capture="environment">
 
     <script>
-        // إعدادات Firebase (مشروعك في آسيا)
-        var firebaseConfig = {
-            apiKey: "AIzaSyANGnbMj4S6xS5Xkl7dSIqTXwqYloy55Mw",
+        // إعداداتك الجديدة التي أرسلتها (تم التحديث)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCRnIF0BEIvf5axNd7S2CjGn1oBI5Ew4KI",
             authDomain: "tik-tak-cdfad.firebaseapp.com",
-            databaseURL: "https://tik-tak-cdfad-default-rtdb.asia-southeast1.firebasedatabase.app/",
             projectId: "tik-tak-cdfad",
-            storageBucket: "tik-tak-cdfad.firebasestorage.app"
+            storageBucket: "tik-tak-cdfad.firebasestorage.app",
+            messagingSenderId: "365921755333",
+            appId: "1:365921755333:web:83c879efb2c05b56bd90ac",
+            databaseURL: "https://tik-tak-cdfad-default-rtdb.asia-southeast1.firebasedatabase.app/"
         };
 
-        // تهيئة Firebase
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-        var db = firebase.database();
-        var st = firebase.storage();
+        // بدء العمل
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        let confirmationResult;
 
-        // دالة جلب الفيديوهات
-        db.ref('videos').on('value', function(snap) {
-            var feed = document.getElementById('feed');
-            if (snap.exists()) {
-                document.getElementById('loader').style.display = 'none';
-                var html = '';
-                snap.forEach(function(child) {
-                    var v = child.val();
-                    html += `
-                        <div class="swiper-slide">
-                            <video src="${v.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
-                            <div class="side-bar">
-                                <div class="icon-btn" onclick="this.style.color='#fe2c55'">❤️<span>0</span></div>
-                                <div class="icon-btn">💬<span>0</span></div>
-                                <div class="icon-btn">🔗</div>
-                            </div>
-                            <div style="position:absolute; bottom:85px; left:15px; font-weight:bold; text-shadow:1px 1px 2px #000;">@${v.user || 'حيدر_الفاهم'}</div>
-                        </div>`;
-                });
-                feed.innerHTML = html;
-                
-                // تفعيل السحب والتشغيل التلقائي
-                var swiper = new Swiper(".mySwiper", { 
-                    direction: "vertical",
-                    on: {
-                        slideChange: function() {
-                            document.querySelectorAll('video').forEach(v => v.pause());
-                            var activeVid = this.slides[this.activeIndex].querySelector('video');
-                            if(activeVid) activeVid.play();
-                        }
-                    }
-                });
-            } else {
-                document.getElementById('loader').innerText = "لا توجد مقاطع، كن أول من ينشر!";
-            }
-        });
+        // إرسال الكود
+        document.getElementById('send-code').onclick = function() {
+            const phone = document.getElementById('phone').value;
+            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' });
+            
+            auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+                .then(result => {
+                    confirmationResult = result;
+                    document.getElementById('phone-box').style.display = 'none';
+                    document.getElementById('code-box').style.display = 'block';
+                    alert("وصلك الرمز الآن!");
+                }).catch(err => alert("خطأ: " + err.message));
+        };
 
-        // دالة الرفع (كاميرا + استوديو)
-        document.getElementById('file-input').onchange = function(e) {
-            var file = e.target.files[0];
-            if(!file) return;
+        // التحقق
+        document.getElementById('verify-code').onclick = function() {
+            const code = document.getElementById('code').value;
+            confirmationResult.confirm(code).then(result => {
+                enterChat(result.user.phoneNumber);
+            }).catch(err => alert("رمز غير صحيح"));
+        };
+
+        function enterChat(phone) {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'flex';
             
-            alert("بدأ الرفع.. يرجى الانتظار ⏳");
-            var ref = st.ref().child('v/' + Date.now() + '.mp4');
-            
-            ref.put(file).then(function(s) {
-                return s.ref.getDownloadURL();
-            }).then(function(url) {
-                db.ref('videos').push({ url: url, user: "Haider", time: Date.now() });
-                alert("تم النشر بنجاح! ✅");
-                location.reload();
-            }).catch(function(err) {
-                alert("حدث خطأ، تأكد من إعدادات القواعد في Firebase");
+            // جلب الرسائل
+            db.ref('whatsapp_messages').limitToLast(50).on('value', snap => {
+                const box = document.getElementById('messages');
+                box.innerHTML = "";
+                snap.forEach(child => {
+                    const d = child.val();
+                    const isMe = d.p === phone;
+                    box.innerHTML += `<div class="msg ${isMe ? 'sent' : 'received'}">
+                        <small style="color:#075e54; font-size:10px;">${d.p}</small><br>${d.m}
+                    </div>`;
+                });
+                box.scrollTop = box.scrollHeight;
             });
+        }
+
+        // إرسال رسالة
+        document.getElementById('send-msg').onclick = function() {
+            const input = document.getElementById('m-input');
+            if(input.value) {
+                db.ref('whatsapp_messages').push({
+                    p: auth.currentUser.phoneNumber,
+                    m: input.value,
+                    t: Date.now()
+                });
+                input.value = "";
+            }
         };
     </script>
 </body>
