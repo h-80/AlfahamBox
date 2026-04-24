@@ -3,187 +3,242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alfaham Store</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <title>مركز الفاهم للصيانة - طلب صيانة منزلي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* التنسيقات العامة */
-        body { 
-            font-family: 'Cairo', sans-serif !important; 
-            background: #f4f4f4; 
-            margin: 0; 
-            padding: 0; 
+        :root {
+            --primary: #FFC107;
+            --dark: #121212;
+            --gray: #f8f9fa;
+            --success: #28a745;
         }
 
-        /* الهيدر باللون الأسود وبدون ظل */
-        .header-text {
-            background: #000000;
-            padding: 20px; 
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        body { background-color: #ebedef; padding: 10px; display: flex; justify-content: center; }
+
+        .app-card {
+            max-width: 480px;
+            width: 100%;
+            background: #fff;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        .hero {
+            background: var(--dark);
+            color: var(--primary);
+            padding: 30px 20px;
             text-align: center;
-            box-shadow: none;
-            margin-bottom: 30px;
         }
 
-        /* تكبير الشعار بشكل أكبر */
-        .header-text img {
-            max-height: 140px;
-            width: auto;
+        .hero i { font-size: 40px; margin-bottom: 10px; }
+        .hero h1 { font-size: 22px; color: #fff; }
+
+        .content { padding: 20px; }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin: 20px 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--primary);
             display: inline-block;
         }
 
-        /* حاوية الكروت */
-        .card-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 0 20px 40px 20px;
-            max-width: 1100px;
-            margin: auto;
-        }
-
-        /* عنصر الكرت مع النص */
-        .card-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100px;
-            flex-shrink: 0;
-        }
-
-        .card {
-            display: block;
-            width: 100px;
-            height: 100px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: 0.3s;
-            background: #fff;
-        }
-
-        .card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-        }
-
-        .card img {
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #555; }
+        
+        input, select, textarea {
             width: 100%;
-            height: 100%;
-            display: block;
-            object-fit: fill;
+            padding: 12px;
+            border: 1.5px solid #eee;
+            border-radius: 12px;
+            background: var(--gray);
+            font-size: 14px;
+            outline: none;
         }
 
-        /* النص تحت الكرت - سطر واحد فقط بدون اقتصاص */
-        .card-label {
-            margin-top: 10px;
-            font-family: 'Cairo', sans-serif;
-            font-size: 16px;
-            font-weight: 900;
-            color: #333;
+        input:focus { border-color: var(--primary); background: #fff; }
+
+        /* حاوية الخرائط الذكية */
+        .map-container {
+            background: #fff9e6;
+            border: 2px dashed var(--primary);
+            border-radius: 15px;
+            padding: 15px;
             text-align: center;
-            line-height: 1.4;
-            white-space: nowrap;    /* منع الالتفاف إلى سطر جديد */
-            overflow: visible;       /* إظهار النص بالكامل بدون اقتصاص */
-            width: auto;            /* عرض تلقائي حسب محتوى النص */
-            max-width: 100%;        /* منع تجاوز عرض الحاوية */
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: 0.3s;
         }
 
-        /* تحسينات الموبايل */
-        @media (max-width: 480px) {
-            .header-text { padding: 15px; }
-            .header-text img { max-height: 85px; }
-            .card-container { gap: 15px; padding: 0 15px; }
-            .card-item {
-                width: 100px;
-            }
-            .card-label {
-                font-size: 14px;
-                font-weight: 900;
-                white-space: nowrap;    /* سطر واحد في الموبايل أيضاً */
-                overflow: visible;
-            }
+        .map-container.active {
+            border-style: solid;
+            border-color: var(--success);
+            background: #f4fff6;
+        }
+
+        .map-container i { font-size: 24px; color: var(--dark); }
+        .map-container p { font-size: 13px; font-weight: bold; margin-top: 5px; }
+
+        .btn-submit {
+            background: var(--dark);
+            color: var(--primary);
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            width: 100%;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .tracking-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
         }
     </style>
 </head>
 <body>
 
-    <header class="header-text">
-        <img src="https://b.top4top.io/p_3725z11nv0.png" alt="Alfaham Store Logo">
-    </header>
-
-    <div class="card-container">
-        
-<div class="card-item">
-            <a href="https://alfahamtv.apk.com" class="card">
-                <img src="https://raw.githubusercontent.com/h-80/img/refs/heads/main/Apk%20(6).png" alt="Alfaham tv">
-            </a>
-            <div class="card-label">Alfaham TV</div>
-        </div>
-
-<div class="card-item">
-            <a href="https://tvkidstv.apk.com" class="card">
-                <img src="https://raw.githubusercontent.com/h-80/img/refs/heads/main/Apk%20(3).png" alt="KIDS TV">
-            </a>
-            <div class="card-label">KIDS TV</div>
-        </div>
-
-<div class="card-item">
-            <a href="https://alfahamtube.apk.com" class="card">
-                <img src="https://raw.githubusercontent.com/h-80/img/refs/heads/main/Apk%20(1).png" alt="Alfaham Tube">
-            </a>
-            <div class="card-label">Alfaham Tube</div>
-        </div>
-
-<div class="card-item">
-            <a href="https://alfahamsat.apk.com" class="card">
-                <img src="https://raw.githubusercontent.com/h-80/img/refs/heads/main/Apk%20(8).png" alt="Alfaham Sat">
-            </a>
-            <div class="card-label">Alfaham Sat</div>
-        </div>
-
-<div class="card-item">
-            <a href="https://alfahambox.apk.com" class="card">
-                <img src="https://raw.githubusercontent.com/h-80/img/refs/heads/main/Apk%20(5).png" alt="Alfaham Box">
-            </a>
-            <div class="card-label">Alfaham Box</div>
-        </div>
-
-<div class="card-item">
-            <a href="https://alfahamlive.apk.com" class="card">
-                <img src="https://raw.githubusercontent.com/h-80/img/refs/heads/main/Apk%20(2).png" alt="Alfaham Live">
-            </a>
-            <div class="card-label">Alfaham Live</div>
-        </div>
-
-<div class="card-item">
-            <a href="https://haidertv.apk.com" class="card">
-                <img src="https://raw.githubusercontent.com/h-80/img/refs/heads/main/Apk%20(9).png" alt="HaideTV">
-            </a>
-            <div class="card-label">Haider TV</div>
-        </div>
-
-<div class="card-item">
-            <a href="https://dramalive.apk.com" class="card">
-                <img src="https://raw.githubusercontent.com/h-80/img/refs/heads/main/Apk%20(7).png" alt="Drama Live">
-            </a>
-            <div class="card-label">Drama Live</div>
-        </div>
-
-<div class="card-item">
-            <a href="https://alfahamstore.apk.com" class="card">
-                <img src="https://raw.githubusercontent.com/h-80/img/refs/heads/main/Apk%20(4).png" alt="Alfaham Store">
-            </a>
-            <div class="card-label">Alfaham Store</div>
-        </div>
-
-<div class="card-item">
-            <a href="https://dramaramadan.net" class="card">
-                <img src="https://raw.githubusercontent.com/h-80/img/refs/heads/main/Oscar%20TV.png" alt="Oscar TV">
-            </a>
-            <div class="card-label">Oscar TV</div>
-        </div>
+<div class="app-card">
+    <div class="hero">
+        <i class="fas fa-tools"></i>
+        <h1>مركز الصيانة الاحترافي</h1>
+        <p style="font-size: 12px; color: #aaa;">خدمة الاستلام والتوصيل لباب المنزل</p>
     </div>
+
+    <div class="content">
+        <form id="mainOrderForm">
+            <div class="section-title">بيانات التواصل</div>
+            <div class="form-group">
+                <label>اسم الزبون</label>
+                <input type="text" id="cust_name" placeholder="الاسم الكامل" required>
+            </div>
+            <div class="form-group">
+                <label>رقم الهاتف (واتساب)</label>
+                <input type="tel" id="cust_phone" placeholder="07XXXXXXXX" required>
+            </div>
+
+            <div class="section-title">تفاصيل الجهاز</div>
+            <div class="form-group">
+                <label>نوع الجهاز</label>
+                <select id="dev_brand">
+                    <option value="آيفون">iPhone</option>
+                    <option value="سامسونج">Samsung</option>
+                    <option value="شاومي">Xiaomi</option>
+                    <option value="بلاي ستيشن">PlayStation</option>
+                    <option value="آخر">أخرى</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>موديل الجهاز ووصف العطل</label>
+                <textarea id="dev_issue" rows="2" placeholder="مثلاً: iPhone 13 - كسر شاشة" required></textarea>
+            </div>
+
+            <div class="section-title">موقع الاستلام</div>
+            <div class="map-container" id="mapTrigger" onclick="startMapping()">
+                <i class="fas fa-map-marked-alt"></i>
+                <p id="mapLabel">اضغط لتحديد موقعك عبر الخريطة</p>
+            </div>
+            
+            <div class="form-group">
+                <label>العنوان يدوياً (أقرب نقطة دالة)</label>
+                <input type="text" id="manual_addr" placeholder="مثلاً: قرب جامع الحسين">
+            </div>
+
+            <div class="form-group">
+                <label>الوقت المفضل للاستلام</label>
+                <select id="pick_time">
+                    <option value="صباحاً">صباحاً (9ص - 12ظ)</option>
+                    <option value="ظهراً">ظهراً (12ظ - 4م)</option>
+                    <option value="مساءً">مساءً (4م - 9م)</option>
+                </select>
+            </div>
+
+            <input type="hidden" id="finalGeoLink">
+
+            <button type="submit" class="btn-submit">
+                إرسال الطلب الآن <i class="fab fa-whatsapp"></i>
+            </button>
+        </form>
+
+        <a href="https://wa.me/9647722353355" class="tracking-link">
+            <i class="fas fa-search"></i> هل لديك طلب سابق؟ تواصل معنا للتتبع
+        </a>
+    </div>
+</div>
+
+<script>
+    function startMapping() {
+        const label = document.getElementById('mapLabel');
+        const trigger = document.getElementById('mapTrigger');
+        const geoInput = document.getElementById('finalGeoLink');
+
+        label.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري محاولة تحديد موقعك...';
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                // نجاح تحديد الموقع (المتصفح)
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                const url = `https://www.google.com/maps?q=${lat},${lon}`;
+                geoInput.value = url;
+                
+                label.innerHTML = "تم حفظ الإحداثيات بنجاح ✓";
+                trigger.classList.add('active');
+            }, function(error) {
+                // فشل (غالباً بسبب WebView في AppCreator24)
+                alert("للسلاسة، سيتم فتح الخريطة لتحديد موقعك يدوياً");
+                window.open("https://www.google.com/maps", "_blank");
+                label.innerHTML = "يرجى كتابة العنوان بالأسفل أو لصق الرابط";
+                trigger.style.borderColor = "#f44336";
+            }, { enableHighAccuracy: true, timeout: 6000 });
+        }
+    }
+
+    document.getElementById('mainOrderForm').onsubmit = function(e) {
+        e.preventDefault();
+        
+        const orderNum = "ORDER-" + Math.floor(Math.random() * 9000 + 1000);
+        const name = document.getElementById('cust_name').value;
+        const phone = document.getElementById('cust_phone').value;
+        const device = document.getElementById('dev_brand').value;
+        const issue = document.getElementById('dev_issue').value;
+        const address = document.getElementById('manual_addr').value;
+        const time = document.getElementById('pick_time').value;
+        const map = document.getElementById('finalGeoLink').value;
+
+        const whatsappNum = "9647722353355"; 
+
+        let msg = `*طلب صيانة جديد [${orderNum}]* 🛠️%0A%0A`;
+        msg += `👤 *الزبون:* ${name}%0A`;
+        msg += `📞 *الهاتف:* ${phone}%0A`;
+        msg += `📱 *الجهاز:* ${device}%0A`;
+        msg += `⚠️ *المشكلة:* ${issue}%0A`;
+        msg += `⏰ *الوقت المفضل:* ${time}%0A`;
+        msg += `📍 *العنوان:* ${address || "غير محدد"}%0A`;
+        
+        if(map) {
+            msg += `%0A🗺️ *رابط الخريطة:*%0A${map}`;
+        }
+
+        const finalUrl = `https://api.whatsapp.com/send?phone=${whatsappNum}&text=${msg}`;
+        window.location.href = finalUrl;
+    };
+</script>
 
 </body>
 </html>
