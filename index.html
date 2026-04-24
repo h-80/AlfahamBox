@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مركز الفاهم للصيانة - طلب صيانة</title>
+    <title>مركز الفاهم للصيانة - طلب ذكي</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -61,27 +61,29 @@
             outline: none;
         }
 
-        input:focus { border-color: var(--primary); background: #fff; }
-
-        .map-container {
+        /* زر الموقع السلس */
+        .location-btn {
             background: #fff9e6;
             border: 2px dashed var(--primary);
-            border-radius: 15px;
+            color: var(--dark);
             padding: 15px;
-            text-align: center;
+            border-radius: 15px;
+            width: 100%;
+            font-weight: bold;
             cursor: pointer;
-            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
             transition: 0.3s;
+            margin-bottom: 15px;
         }
 
-        .map-container.active {
-            border-style: solid;
-            border-color: var(--success);
+        .location-btn.confirmed {
             background: #f4fff6;
+            border: 2px solid var(--success);
+            color: var(--success);
         }
-
-        .map-container i { font-size: 24px; color: var(--dark); }
-        .map-container p { font-size: 13px; font-weight: bold; margin-top: 5px; }
 
         .btn-submit {
             background: var(--dark);
@@ -94,10 +96,7 @@
             font-weight: bold;
             cursor: pointer;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 15px;
+            justify-content: center; align-items: center; gap: 10px;
         }
 
         .footer-text { text-align: center; font-size: 10px; color: #bbb; margin-top: 15px; }
@@ -112,21 +111,18 @@
     </div>
 
     <div class="content">
-        <form id="orderFormV3">
+        <form id="autoOrderForm">
             <div class="section-title">بيانات الزبون</div>
             <div class="form-group">
-                <label>الاسم الكامل</label>
-                <input type="text" id="u_name" placeholder="أدخل اسمك هنا" required>
+                <input type="text" id="cust_name" placeholder="الاسم الكامل" required>
             </div>
             <div class="form-group">
-                <label>رقم الهاتف</label>
-                <input type="tel" id="u_phone" placeholder="07XXXXXXXX" required>
+                <input type="tel" id="cust_phone" placeholder="رقم الهاتف" required>
             </div>
 
             <div class="section-title">تفاصيل الجهاز</div>
             <div class="form-group">
-                <label>نوع الجهاز</label>
-                <select id="u_device">
+                <select id="cust_device">
                     <option value="آيفون">iPhone</option>
                     <option value="سامسونج">Samsung</option>
                     <option value="شاومي">Xiaomi</option>
@@ -135,72 +131,81 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>وصف العطل</label>
-                <textarea id="u_issue" rows="2" placeholder="ما هي مشكلة الجهاز؟" required></textarea>
+                <textarea id="cust_issue" rows="2" placeholder="وصف العطل..." required></textarea>
             </div>
 
-            <div class="section-title">الموقع</div>
-            <div class="map-container" id="gpsBox" onclick="fetchGPS()">
-                <i class="fas fa-map-marker-alt"></i>
-                <p id="gpsLabel">تحديد الموقع (GPS)</p>
+            <div class="section-title">موقع الاستلام</div>
+            <div class="location-btn" id="locTrigger" onclick="autoCaptureLocation()">
+                <i class="fas fa-map-marker-alt" id="locIcon"></i>
+                <span id="locStatus">اضغط هنا لتأكيد موقعك الحالي</span>
             </div>
             
             <div class="form-group">
-                <label>العنوان يدوياً</label>
-                <input type="text" id="u_address" placeholder="المحافظة - الحي - أقرب نقطة دالة">
+                <input type="text" id="cust_addr_manual" placeholder="العنوان يدوياً (اختياري)">
             </div>
 
-            <input type="hidden" id="gpsLinkValue">
+            <input type="hidden" id="hidden_map_link">
 
             <button type="submit" class="btn-submit">
-                إرسال الطلب <i class="fab fa-whatsapp"></i>
+                إرسال الطلب عبر واتساب <i class="fab fa-whatsapp"></i>
             </button>
         </form>
-        <p class="footer-text">نظام حجز صيانة - جميع الحقوق محفوظة</p>
+        <p class="footer-text">خدمة الصيانة المنزلية - استلام وتوصيل</p>
     </div>
 </div>
 
 <script>
-    function fetchGPS() {
-        const label = document.getElementById('gpsLabel');
-        const box = document.getElementById('gpsBox');
-        const hiddenInput = document.getElementById('gpsLinkValue');
+    // وظيفة جلب الموقع التلقائي بضغطة واحدة
+    function autoCaptureLocation() {
+        const status = document.getElementById('locStatus');
+        const icon = document.getElementById('locIcon');
+        const trigger = document.getElementById('locTrigger');
+        const hiddenLink = document.getElementById('hidden_map_link');
 
-        label.innerHTML = "جاري التحديد...";
+        status.innerText = "جاري تحديد إحداثياتك...";
+        icon.className = "fas fa-spinner fa-spin";
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
-                hiddenInput.value = `https://www.google.com/maps?q=${lat},${lon}`;
-                label.innerHTML = "تم حفظ الموقع ✓";
-                box.classList.add('active');
-            }, function() {
-                alert("يرجى تفعيل الموقع. سنفتح الخرائط لتختار موقعك.");
-                window.open("https://www.google.com/maps", "_blank");
-                label.innerHTML = "يرجى كتابة العنوان بالأسفل";
-            }, { enableHighAccuracy: true });
+                
+                // إنشاء الرابط تلقائياً
+                const mapURL = `https://www.google.com/maps?q=${lat},${lon}`;
+                hiddenLink.value = mapURL;
+
+                // تحديث شكل الزر للنجاح
+                status.innerText = "تم تأكيد موقعك بنجاح ✓";
+                icon.className = "fas fa-check-circle";
+                trigger.classList.add('confirmed');
+            }, function(error) {
+                // في حال فشل الجلب (الصلاحيات)
+                alert("يرجى تفعيل الـ GPS والسماح للتطبيق بالوصول للموقع");
+                status.innerText = "فشل التحديد - تأكد من الـ GPS";
+                icon.className = "fas fa-exclamation-triangle";
+            }, { enableHighAccuracy: true, timeout: 5000 });
+        } else {
+            alert("المتصفح لا يدعم تحديد الموقع");
         }
     }
 
-    document.getElementById('orderFormV3').onsubmit = function(e) {
+    document.getElementById('autoOrderForm').onsubmit = function(e) {
         e.preventDefault();
         
-        // جلب الوقت والتاريخ الحالي
         const now = new Date();
         const dateStr = now.toLocaleDateString('ar-EG'); 
         const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
 
-        const name = document.getElementById('u_name').value;
-        const phone = document.getElementById('u_phone').value;
-        const device = document.getElementById('u_device').value;
-        const issue = document.getElementById('u_issue').value;
-        const address = document.getElementById('u_address').value;
-        const map = document.getElementById('gpsLinkValue').value;
+        const name = document.getElementById('cust_name').value;
+        const phone = document.getElementById('cust_phone').value;
+        const device = document.getElementById('cust_device').value;
+        const issue = document.getElementById('cust_issue').value;
+        const addrManual = document.getElementById('cust_addr_manual').value;
+        const finalMap = document.getElementById('hidden_map_link').value;
 
         const whatsappNum = "9647722353355"; 
 
-        // بناء الرسالة المطلوبة
+        // بناء الرسالة النهائية
         let msg = `*طلب صيانة جديد* 🛠️%0A`;
         msg += `*التاريخ:* ${dateStr}%0A`;
         msg += `*الساعة:* ${timeStr}%0A`;
@@ -209,10 +214,10 @@
         msg += `📞 *الهاتف:* ${phone}%0A`;
         msg += `📱 *الجهاز:* ${device}%0A`;
         msg += `⚠️ *العطل:* ${issue}%0A`;
-        msg += `📍 *العنوان:* ${address || "محدد في الخريطة"}%0A`;
+        msg += `📍 *العنوان:* ${addrManual || "مرفق في الرابط"}%0A`;
         
-        if(map) {
-            msg += `%0A🗺️ *رابط الموقع:*%0A${map}`;
+        if(finalMap) {
+            msg += `%0A🗺️ *رابط الموقع المباشر:*%0A${finalMap}`;
         }
 
         window.location.href = `https://api.whatsapp.com/send?phone=${whatsappNum}&text=${msg}`;
