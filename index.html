@@ -2,124 +2,168 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>واتساب الفاهم - النسخة الجديدة</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tik Tak - Rooms</title>
     
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
 
     <style>
-        :root { --green: #075e54; --white: #ffffff; --light-green: #dcf8c6; }
-        body { font-family: sans-serif; margin: 0; background: #e5ddd5; }
-        #auth-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #fff; }
-        input { width: 80%; padding: 12px; margin: 10px; border: 1px solid #ccc; border-radius: 5px; text-align: center; font-size: 16px; }
-        button { width: 85%; padding: 12px; background: #25d366; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        #chat-screen { display: none; height: 100vh; flex-direction: column; }
-        .header { background: var(--green); color: white; padding: 15px; font-size: 18px; font-weight: bold; }
-        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 8px 12px; border-radius: 10px; max-width: 75%; font-size: 15px; position: relative; }
-        .sent { align-self: flex-end; background: var(--light-green); }
-        .received { align-self: flex-start; background: var(--white); }
-        .input-bar { background: #f0f0f0; padding: 10px; display: flex; gap: 10px; }
-        #m-input { flex: 1; border-radius: 20px; border: none; padding: 10px; }
+        :root { --main: #fe2c55; --dark: #121212; --gray: #f0f2f5; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; background: var(--gray); overflow: hidden; }
+        
+        /* الهيدر */
+        .top-nav { background: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; }
+        .logo { font-weight: bold; color: var(--main); font-size: 20px; }
+
+        /* شاشة اللوبي */
+        #lobby { display: block; height: 90vh; overflow-y: auto; padding: 15px; }
+        .section-title { font-size: 14px; color: #666; margin: 15px 0 10px; font-weight: bold; }
+        .room-item { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .create-btn { background: var(--dark); color: #fff; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 20px; }
+
+        /* شاشة الدردشة */
+        #chat-ui { display: none; height: 100vh; flex-direction: column; background: #fff; }
+        .chat-head { padding: 15px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; }
+        #msgs { flex: 1; overflow-y: auto; padding: 15px; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; }
+        .bubble { max-width: 80%; padding: 10px; border-radius: 15px; font-size: 14px; line-height: 1.4; position: relative; }
+        .m-mine { align-self: flex-end; background: var(--main); color: #fff; }
+        .m-others { align-self: flex-start; background: #eee; color: #000; }
+        .u-name { font-size: 10px; font-weight: bold; display: block; margin-bottom: 3px; }
+
+        .input-area { padding: 10px; display: flex; gap: 8px; border-top: 1px solid #eee; background: #fff; }
+        #text-in { flex: 1; border: none; background: #f0f2f5; padding: 10px; border-radius: 20px; outline: none; }
+
+        /* شاشة الدخول */
+        #login-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #fff; }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen">
-        <div style="font-size: 28px; color: #25d366; font-weight: bold; margin-bottom: 20px;">الفاهم واتساب</div>
-        <div id="phone-box">
-            <input type="text" id="phone" placeholder="+964 000 000 0000">
-            <button id="send-code">إرسال الرمز 💬</button>
-        </div>
-        <div id="code-box" style="display:none;">
-            <input type="text" id="code" placeholder="أدخل الرمز المستلم">
-            <button id="verify-code">تأكيد ودخول ✅</button>
-        </div>
-        <div id="recaptcha-container"></div>
+    <div id="login-screen">
+        <h1 class="logo">Tik Tak</h1>
+        <button onclick="login()" style="padding:15px; background:#4285F4; color:#fff; border:none; border-radius:8px; cursor:pointer;">الدخول عبر جوجل</button>
     </div>
 
-    <div id="chat-screen">
-        <div class="header">الفاهم واتساب - متصل الآن</div>
-        <div id="messages"></div>
-        <div class="input-bar">
-            <input type="text" id="m-input" placeholder="اكتب رسالتك...">
-            <button id="send-msg" style="width: 50px; border-radius: 50%; background: #075e54;">➤</button>
+    <div id="lobby" style="display:none;">
+        <div class="top-nav"><span class="logo">Tik Tak</span> <button onclick="logout()" style="font-size:12px; background:none; border:1px solid #ccc; border-radius:5px;">خروج</button></div>
+        <div style="padding:10px;">
+            <button class="create-btn" onclick="createNewRoom()">+ إنشاء غرفة دردشة جديدة</button>
+            
+            <div class="section-title">غرف الدول العربية 🌍</div>
+            <div id="country-rooms">
+                <div class="room-item" onclick="join('العراق 🇮🇶')"><span>🇮🇶 العراق</span> ➜</div>
+                <div class="room-item" onclick="join('السعودية 🇸🇦')"><span>🇸🇦 السعودية</span> ➜</div>
+                <div class="room-item" onclick="join('مصر 🇪🇬')"><span>🇪🇬 مصر</span> ➜</div>
+            </div>
+
+            <div class="section-title">غرف المستخدمين الحالية 🔥</div>
+            <div id="user-rooms">
+                </div>
+        </div>
+    </div>
+
+    <div id="chat-ui">
+        <div class="chat-head"><span onclick="backToLobby()" style="cursor:pointer; font-size:20px;">🔙</span> <span id="room-title" style="font-weight:bold;">اسم الغرفة</span></div>
+        <div id="msgs"></div>
+        <div class="input-area">
+            <input type="text" id="text-in" placeholder="اكتب رسالة...">
+            <button id="send-btn" style="background:none; border:none; font-size:20px; cursor:pointer;">🚀</button>
         </div>
     </div>
 
     <script>
-        // إعداداتك الجديدة التي أرسلتها (تم التحديث)
-        const firebaseConfig = {
+        const config = {
             apiKey: "AIzaSyCRnIF0BEIvf5axNd7S2CjGn1oBI5Ew4KI",
             authDomain: "tik-tak-cdfad.firebaseapp.com",
             projectId: "tik-tak-cdfad",
             storageBucket: "tik-tak-cdfad.firebasestorage.app",
-            messagingSenderId: "365921755333",
-            appId: "1:365921755333:web:83c879efb2c05b56bd90ac",
             databaseURL: "https://tik-tak-cdfad-default-rtdb.asia-southeast1.firebasedatabase.app/"
         };
-
-        // بدء العمل
-        firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(config);
         const auth = firebase.auth();
         const db = firebase.database();
-        let confirmationResult;
+        let activeRoom = "";
 
-        // إرسال الكود
-        document.getElementById('send-code').onclick = function() {
-            const phone = document.getElementById('phone').value;
-            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { 'size': 'invisible' });
-            
-            auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
-                .then(result => {
-                    confirmationResult = result;
-                    document.getElementById('phone-box').style.display = 'none';
-                    document.getElementById('code-box').style.display = 'block';
-                    alert("وصلك الرمز الآن!");
-                }).catch(err => alert("خطأ: " + err.message));
-        };
+        // دخول وخروج
+        function login() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
+        function logout() { auth.signOut(); location.reload(); }
 
-        // التحقق
-        document.getElementById('verify-code').onclick = function() {
-            const code = document.getElementById('code').value;
-            confirmationResult.confirm(code).then(result => {
-                enterChat(result.user.phoneNumber);
-            }).catch(err => alert("رمز غير صحيح"));
-        };
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('lobby').style.display = 'block';
+                fetchUserRooms();
+            }
+        });
 
-        function enterChat(phone) {
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('chat-screen').style.display = 'flex';
-            
-            // جلب الرسائل
-            db.ref('whatsapp_messages').limitToLast(50).on('value', snap => {
-                const box = document.getElementById('messages');
-                box.innerHTML = "";
+        // إنشاء غرفة جديدة
+        function createNewRoom() {
+            let rName = prompt("أدخل اسم الغرفة الجديدة:");
+            if (rName) {
+                db.ref('public_rooms').push({ name: rName, creator: auth.currentUser.displayName });
+                join(rName);
+            }
+        }
+
+        // جلب غرف المستخدمين
+        function fetchUserRooms() {
+            db.ref('public_rooms').on('value', snap => {
+                const list = document.getElementById('user-rooms');
+                list.innerHTML = "";
                 snap.forEach(child => {
-                    const d = child.val();
-                    const isMe = d.p === phone;
-                    box.innerHTML += `<div class="msg ${isMe ? 'sent' : 'received'}">
-                        <small style="color:#075e54; font-size:10px;">${d.p}</small><br>${d.m}
+                    let r = child.val();
+                    list.innerHTML += `<div class="room-item" onclick="join('${r.name}')">
+                        <span>💬 ${r.name} <small style="color:#999; font-size:10px;">(بواسطة ${r.creator})</small></span> ➜
+                    </div>`;
+                });
+            });
+        }
+
+        function join(name) {
+            activeRoom = name;
+            document.getElementById('lobby').style.display = 'none';
+            document.getElementById('chat-ui').style.display = 'flex';
+            document.getElementById('room-title').innerText = name;
+            loadMessages();
+        }
+
+        function backToLobby() {
+            document.getElementById('chat-ui').style.display = 'none';
+            document.getElementById('lobby').style.display = 'block';
+            db.ref('chats/' + activeRoom).off();
+        }
+
+        // إرسال الرسائل
+        document.getElementById('send-btn').onclick = () => {
+            let m = document.getElementById('text-in').value;
+            if(m) {
+                db.ref('chats/' + activeRoom).push({
+                    u: auth.currentUser.displayName,
+                    uid: auth.currentUser.uid,
+                    m: m,
+                    t: Date.now()
+                });
+                document.getElementById('text-in').value = "";
+            }
+        };
+
+        function loadMessages() {
+            db.ref('chats/' + activeRoom).limitToLast(50).on('value', snap => {
+                const box = document.getElementById('msgs');
+                box.innerHTML = "";
+                snap.forEach(c => {
+                    let d = c.val();
+                    let isMe = d.uid === auth.currentUser.uid;
+                    box.innerHTML += `<div class="bubble ${isMe ? 'm-mine' : 'm-others'}">
+                        <span class="u-name">${d.u}</span>${d.m}
                     </div>`;
                 });
                 box.scrollTop = box.scrollHeight;
             });
         }
-
-        // إرسال رسالة
-        document.getElementById('send-msg').onclick = function() {
-            const input = document.getElementById('m-input');
-            if(input.value) {
-                db.ref('whatsapp_messages').push({
-                    p: auth.currentUser.phoneNumber,
-                    m: input.value,
-                    t: Date.now()
-                });
-                input.value = "";
-            }
-        };
     </script>
 </body>
 </html>
