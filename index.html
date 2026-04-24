@@ -2,301 +2,227 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Iraq Chat - عراق شات</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز الفاهم للصيانة - طلب ذكي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-
     <style>
-        :root { 
-            --wa-green: #075e54; --wa-action: #00a884;
-            --tt-red: #fe2c55; --bg-light-green: #f0f7f4; 
-            --msg-me: #dcf8c6; --msg-them: #ffffff;
+        :root {
+            --primary: #FFC107;
+            --dark: #121212;
+            --gray: #f8f9fa;
+            --success: #28a745;
         }
 
-        * { font-family: 'Cairo', sans-serif; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-light-green); overflow: hidden; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; }
+        body { background-color: #ebedef; padding: 10px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
 
-        /* شاشة الدخول */
-        #auth-screen { display: none; height: 100vh; flex-direction: column; align-items: center; justify-content: center; background: #fff; padding: 25px; }
-        .auth-in { width: 100%; max-width: 320px; padding: 14px; margin-bottom: 10px; border-radius: 12px; border: 1px solid #ddd; outline: none; }
-        .btn-auth { width: 100%; max-width: 320px; padding: 15px; background: #000; color: #fff; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; }
-        .btn-google { width: 100%; max-width: 320px; padding: 12px; background: #fff; border: 1px solid #ddd; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; margin-top: 10px; }
+        .app-card {
+            max-width: 480px;
+            width: 100%;
+            background: #fff;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
 
-        /* الواجهة الرئيسية */
-        .main-header { position: sticky; top: 0; background: var(--wa-green); color: #fff; padding: 15px; text-align: center; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        #lobby-screen { display: none; height: 100vh; overflow-y: auto; padding-bottom: 30px; }
-        .rooms-container { padding: 15px; }
+        .hero {
+            background: var(--dark);
+            color: var(--primary);
+            padding: 25px;
+            text-align: center;
+        }
 
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin: 20px 5px 12px; }
-        .section-title { font-size: 16px; font-weight: 800; color: #444; border-right: 4px solid var(--wa-action); padding-right: 10px; margin: 0; }
+        .hero i { font-size: 35px; margin-bottom: 10px; }
+        .hero h1 { font-size: 20px; color: #fff; }
+
+        .content { padding: 20px; }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin: 15px 0 10px 0;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--primary);
+            display: inline-block;
+        }
+
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #444; }
         
-        .btn-add-room {
-            background: var(--wa-action); color: #fff; border: none; 
-            padding: 6px 14px; border-radius: 20px; 
-            font-size: 13px; font-weight: 700; cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 5px;
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #eee;
+            border-radius: 12px;
+            background: var(--gray);
+            font-size: 14px;
+            outline: none;
         }
 
-        .room-card { 
-            background: #fff; border-radius: 18px; padding: 18px; margin-bottom: 12px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            border-right: 6px solid var(--tt-red); box-shadow: 0 4px 12px rgba(0,0,0,0.03); cursor: pointer; 
-            height: 85px; 
+        /* زر الموقع السلس */
+        .location-btn {
+            background: #fff9e6;
+            border: 2px dashed var(--primary);
+            color: var(--dark);
+            padding: 15px;
+            border-radius: 15px;
+            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: 0.3s;
+            margin-bottom: 15px;
         }
-        .room-fixed { border-right-color: #2ecc71; background: #f9fffb; }
-        
-        .room-info { flex: 1; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-        .room-name { font-weight: 800; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .room-owner { color: #888; font-size: 12px; margin-top: 2px; }
 
-        .room-actions { display: flex; align-items: center; gap: 10px; }
-        .online-tag { background: #e8f5e9; color: #2e7d32; padding: 4px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; }
-        .delete-room-btn { color: #ff4d4d; font-size: 22px; cursor: pointer; }
-
-        /* تصميم النوافذ المنبثقة (Modal) */
-        .modal-overlay { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.5); z-index: 3000; align-items: center; justify-content: center; padding: 20px;
+        .location-btn.confirmed {
+            background: #f4fff6;
+            border: 2px solid var(--success);
+            color: var(--success);
         }
-        .modal-card { 
-            background: #fff; width: 100%; max-width: 350px; border-radius: 20px; padding: 25px; 
-            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+
+        .btn-submit {
+            background: var(--dark);
+            color: var(--primary);
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            width: 100%;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center; align-items: center; gap: 10px;
         }
-        .modal-input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 10px; border: 1px solid #ddd; outline: none; text-align: center; font-weight: 600; }
-        .modal-btns { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-m { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; }
-        .btn-confirm { background: var(--wa-action); color: #fff; }
-        .btn-delete { background: var(--tt-red); color: #fff; }
-        .btn-cancel { background: #eee; color: #555; }
 
-        /* واجهة الدردشة */
-        #chat-screen { display: none; height: 100vh; flex-direction: column; background: #e5ddd5; background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); }
-        .chat-header { background: var(--wa-green); color: #fff; padding: 15px; text-align: center; font-weight: 800; }
-        #msg-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 6px; }
-        
-        .bubble { max-width: 85%; padding: 8px 12px; font-size: 16px; font-weight: 600; border-radius: 15px; }
-        .bubble.me { align-self: flex-end; background: var(--msg-me); border-bottom-right-radius: 2px; }
-        .bubble.them { align-self: flex-start; background: var(--msg-them); border-bottom-left-radius: 2px; }
-        .sticker-msg { font-size: 38px; background: none !important; box-shadow: none !important; }
-
-        .input-bar { padding: 10px; display: flex; align-items: center; gap: 8px; }
-        .input-wrapper { background: #fff; flex: 1; border-radius: 25px; padding: 5px 15px; display: flex; align-items: center; min-height: 48px; }
-        #m-in { flex: 1; border: none; outline: none; font-size: 17px; background: transparent; }
-        .btn-send { background: var(--wa-action); border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-
-        #sticker-panel { display: none; background: #f0f0f0; height: 210px; overflow-y: auto; padding: 10px; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-        .sticker-item { font-size: 32px; cursor: pointer; text-align: center; }
+        .footer-text { text-align: center; font-size: 10px; color: #bbb; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-    <div id="modal-create" class="modal-overlay">
-        <div class="modal-card">
-            <h3 style="margin:0">إنشاء غرفة جديدة</h3>
-            <input type="text" id="new-room-name-input" class="modal-input" placeholder="اكتب اسم الغرفة هنا..." maxlength="25">
-            <div class="modal-btns">
-                <button class="btn-m btn-confirm" onclick="confirmCreateRoom()">إنشاء</button>
-                <button class="btn-m btn-cancel" onclick="hideModal('modal-create')">إلغاء</button>
-            </div>
-        </div>
+<div class="app-card">
+    <div class="hero">
+        <i class="fas fa-tools"></i>
+        <h1>مركز الصيانة الاحترافي</h1>
     </div>
 
-    <div id="modal-delete" class="modal-overlay">
-        <div class="modal-card">
-            <h3 style="margin:0; color: var(--tt-red);">حذف الغرفة</h3>
-            <p style="font-weight: 600; color: #666; margin: 15px 0;">هل أنت متأكد من حذف هذه الغرفة نهائياً؟</p>
-            <div class="modal-btns">
-                <button class="btn-m btn-delete" onclick="confirmDeleteRoom()">حذف</button>
-                <button class="btn-m btn-cancel" onclick="hideModal('modal-delete')">إلغاء</button>
+    <div class="content">
+        <form id="autoOrderForm">
+            <div class="section-title">بيانات الزبون</div>
+            <div class="form-group">
+                <input type="text" id="cust_name" placeholder="الاسم الكامل" required>
             </div>
-        </div>
-    </div>
-
-    <div id="auth-screen">
-        <h1 style="font-weight: 900; font-size: 45px; margin-bottom: 25px;">عراق شات - Iraq Chat</h1>
-        <input type="email" id="u-email" placeholder="البريد الإلكتروني" class="auth-in">
-        <input type="password" id="u-pass" placeholder="كلمة المرور" class="auth-in">
-        <button onclick="manualAuth()" class="btn-auth">دخول</button>
-        <button onclick="googleAuth()" class="btn-google">
-            <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" width="18"> الدخول بواسطة جوجل
-        </button>
-    </div>
-
-    <div id="lobby-screen">
-        <div class="main-header"><h1 style="margin:0; font-size:22px; font-weight: 900;">عراق شات - Iraq Chat</h1></div>
-        <div class="rooms-container">
-            <div class="section-header">
-                <h2 class="section-title">غرف الدردشة الرئيسية</h2>
-                <button class="btn-add-room" onclick="showModal('modal-create')"><span>+</span> إنشاء غرفة</button>
+            <div class="form-group">
+                <input type="tel" id="cust_phone" placeholder="رقم الهاتف" required>
             </div>
-            <div id="fixed-rooms"></div>
+
+            <div class="section-title">تفاصيل الجهاز</div>
+            <div class="form-group">
+                <select id="cust_device">
+                    <option value="آيفون">iPhone</option>
+                    <option value="سامسونج">Samsung</option>
+                    <option value="شاومي">Xiaomi</option>
+                    <option value="بلاي ستيشن">PlayStation</option>
+                    <option value="أخرى">أخرى</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <textarea id="cust_issue" rows="2" placeholder="وصف العطل..." required></textarea>
+            </div>
+
+            <div class="section-title">موقع الاستلام</div>
+            <div class="location-btn" id="locTrigger" onclick="autoCaptureLocation()">
+                <i class="fas fa-map-marker-alt" id="locIcon"></i>
+                <span id="locStatus">اضغط هنا لتأكيد موقعك الحالي</span>
+            </div>
             
-            <div class="section-header">
-                <h2 class="section-title">غرف المستخدمين</h2>
+            <div class="form-group">
+                <input type="text" id="cust_addr_manual" placeholder="العنوان يدوياً (اختياري)">
             </div>
-            <div id="user-rooms"></div>
-        </div>
-    </div>
 
-    <div id="chat-screen">
-        <div class="chat-header"><div id="active-room-name" style="font-size: 19px;">...</div></div>
-        <div id="msg-container"></div>
-        <div id="sticker-panel">
-            <span class="sticker-item" onclick="sendSticker('😂')">😂</span>
-            <span class="sticker-item" onclick="sendSticker('😍')">😍</span>
-            <span class="sticker-item" onclick="sendSticker('❤️')">❤️</span>
-            <span class="sticker-item" onclick="sendSticker('🌹')">🌹</span>
-            <span class="sticker-item" onclick="sendSticker('👍')">👍</span>
-            <span class="sticker-item" onclick="sendSticker('🇮🇶')">🇮🇶</span>
-            <span class="sticker-item" onclick="sendSticker('🔥')">🔥</span>
-            <span class="sticker-item" onclick="sendSticker('🤣')">🤣</span>
-            <span class="sticker-item" onclick="sendSticker('😎')">😎</span>
-            <span class="sticker-item" onclick="sendSticker('✨')">✨</span>
-        </div>
-        <div class="input-bar">
-            <div class="input-wrapper">
-                <span onclick="toggleStickers()" style="cursor:pointer; font-size:24px; padding-left:10px;">😊</span>
-                <input type="text" id="m-in" placeholder="اكتب رسالتك..." autocomplete="off">
-            </div>
-            <button class="btn-send" onclick="sendText()">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+            <input type="hidden" id="hidden_map_link">
+
+            <button type="submit" class="btn-submit">
+                إرسال الطلب عبر واتساب <i class="fab fa-whatsapp"></i>
             </button>
-        </div>
+        </form>
+        <p class="footer-text">خدمة الصيانة المنزلية - استلام وتوصيل</p>
     </div>
+</div>
 
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyCRnIF0BEIvf5axNd7S2CjGn1oBI5Ew4KI", authDomain: "tik-tak-cdfad.firebaseapp.com", projectId: "tik-tak-cdfad", databaseURL: "https://tik-tak-cdfad-default-rtdb.asia-southeast1.firebasedatabase.app/" };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth(), db = firebase.database();
+<script>
+    // وظيفة جلب الموقع التلقائي بضغطة واحدة
+    function autoCaptureLocation() {
+        const status = document.getElementById('locStatus');
+        const icon = document.getElementById('locIcon');
+        const trigger = document.getElementById('locTrigger');
+        const hiddenLink = document.getElementById('hidden_map_link');
 
-        let currentRoomId = "";
-        let roomToDeleteId = ""; // لتخزين معرف الغرفة المراد حذفها
+        status.innerText = "جاري تحديد إحداثياتك...";
+        icon.className = "fas fa-spinner fa-spin";
 
-        function setView(view) {
-            if (auth.currentUser && view === 'auth') view = 'lobby';
-            document.getElementById('auth-screen').style.display = view === 'auth' ? 'flex' : 'none';
-            document.getElementById('lobby-screen').style.display = view === 'lobby' ? 'block' : 'none';
-            document.getElementById('chat-screen').style.display = view === 'chat' ? 'flex' : 'none';
-            if (view === 'chat') history.pushState({view: 'chat'}, "");
-            else history.replaceState({view: 'lobby'}, "");
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                
+                // إنشاء الرابط تلقائياً
+                const mapURL = `https://www.google.com/maps?q=${lat},${lon}`;
+                hiddenLink.value = mapURL;
+
+                // تحديث شكل الزر للنجاح
+                status.innerText = "تم تأكيد موقعك بنجاح ✓";
+                icon.className = "fas fa-check-circle";
+                trigger.classList.add('confirmed');
+            }, function(error) {
+                // في حال فشل الجلب (الصلاحيات)
+                alert("يرجى تفعيل الـ GPS والسماح للتطبيق بالوصول للموقع");
+                status.innerText = "فشل التحديد - تأكد من الـ GPS";
+                icon.className = "fas fa-exclamation-triangle";
+            }, { enableHighAccuracy: true, timeout: 5000 });
+        } else {
+            alert("المتصفح لا يدعم تحديد الموقع");
         }
+    }
 
-        window.onpopstate = function() {
-            if (auth.currentUser) {
-                if (currentRoomId) exitChatUI();
-                else history.pushState({view: 'lobby'}, "");
-            } else setView('auth');
-        };
-
-        auth.onAuthStateChanged(user => { if(user) { setView('lobby'); listenToRooms(); } else { setView('auth'); } });
-
-        function googleAuth() { auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-        function manualAuth() { 
-            const e = document.getElementById('u-email').value, p = document.getElementById('u-pass').value;
-            if(e && p) auth.signInWithEmailAndPassword(e, p);
-        }
-
-        // وظائف النوافذ (Modals)
-        function showModal(id) { document.getElementById(id).style.display = 'flex'; if(id==='modal-create') document.getElementById('new-room-name-input').focus(); }
-        function hideModal(id) { document.getElementById(id).style.display = 'none'; if(id==='modal-create') document.getElementById('new-room-name-input').value = ''; }
-
-        function confirmCreateRoom() {
-            const name = document.getElementById('new-room-name-input').value;
-            if(name && name.trim().length > 2) {
-                db.ref('rooms_meta').push({ name: name.trim(), creator: auth.currentUser.displayName || "مستخدم", uid: auth.currentUser.uid });
-                hideModal('modal-create');
-            }
-        }
-
-        function showDeletePrompt(id) { roomToDeleteId = id; showModal('modal-delete'); }
-        function confirmDeleteRoom() {
-            if(roomToDeleteId) {
-                db.ref('rooms_meta/' + roomToDeleteId).remove();
-                db.ref('chats/' + roomToDeleteId).remove();
-                hideModal('modal-delete');
-                roomToDeleteId = "";
-            }
-        }
-
-        function listenToRooms() {
-            const fixed = [{id:'iraq_gen', name:'🇮🇶 شات العراق العام'},{id:'heiba_vip', name:'👑 مضافة الهيبة'},{id:'games_fun', name:'🔥 قسم المسابقات'}];
-            const fixedBox = document.getElementById('fixed-rooms'); fixedBox.innerHTML = "";
-            fixed.forEach(r => {
-                fixedBox.innerHTML += `
-                    <div class="room-card room-fixed" onclick="joinRoom('${r.id}', '${r.name}')">
-                        <div class="room-info"><div class="room-name">${r.name}</div></div>
-                        <div class="room-actions"><span class="online-tag" id="cnt-${r.id}">0</span></div>
-                    </div>`;
-                db.ref('presence/'+r.id).on('value', s => { if(document.getElementById('cnt-'+r.id)) document.getElementById('cnt-'+r.id).innerText = s.numChildren() || 0; });
-            });
-
-            db.ref('rooms_meta').on('value', snap => {
-                const userBox = document.getElementById('user-rooms'); userBox.innerHTML = "";
-                snap.forEach(c => {
-                    const r = c.val(), isOwner = r.uid === auth.currentUser.uid;
-                    userBox.innerHTML += `
-                        <div class="room-card">
-                            <div class="room-info" onclick="joinRoom('${c.key}', '${r.name}')">
-                                <div class="room-name">${r.name}</div>
-                                <div class="room-owner">بواسطة: ${r.creator}</div>
-                            </div>
-                            <div class="room-actions">
-                                <span class="online-tag" id="cnt-${c.key}">0</span>
-                                ${isOwner ? `<span class="delete-room-btn" onclick="showDeletePrompt('${c.key}')">🗑️</span>` : ''}
-                            </div>
-                        </div>`;
-                    db.ref('presence/'+c.key).on('value', s => { if(document.getElementById('cnt-'+c.key)) document.getElementById('cnt-'+c.key).innerText = s.numChildren() || 0; });
-                });
-            });
-        }
-
-        function joinRoom(id, name) {
-            currentRoomId = id;
-            document.getElementById('active-room-name').innerText = name;
-            db.ref('presence/'+id+'/'+auth.currentUser.uid).set(true);
-            db.ref('presence/'+id+'/'+auth.currentUser.uid).onDisconnect().remove();
-            setView('chat'); loadMsgs();
-        }
-
-        function exitChatUI() {
-            if(currentRoomId) db.ref('presence/'+currentRoomId+'/'+auth.currentUser.uid).remove();
-            currentRoomId = "";
-            document.getElementById('lobby-screen').style.display = 'block';
-            document.getElementById('chat-screen').style.display = 'none';
-        }
-
-        function toggleStickers() { const p = document.getElementById('sticker-panel'); p.style.display = p.style.display === 'grid' ? 'none' : 'grid'; }
+    document.getElementById('autoOrderForm').onsubmit = function(e) {
+        e.preventDefault();
         
-        function sendText() {
-            const i = document.getElementById('m-in');
-            if(i.value.trim() && currentRoomId) {
-                db.ref('chats/'+currentRoomId).push({ u: auth.currentUser.displayName || "مستخدم", uid: auth.currentUser.uid, m: i.value, type: 'text' });
-                i.value = "";
-            }
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('ar-EG'); 
+        const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+
+        const name = document.getElementById('cust_name').value;
+        const phone = document.getElementById('cust_phone').value;
+        const device = document.getElementById('cust_device').value;
+        const issue = document.getElementById('cust_issue').value;
+        const addrManual = document.getElementById('cust_addr_manual').value;
+        const finalMap = document.getElementById('hidden_map_link').value;
+
+        const whatsappNum = "9647722353355"; 
+
+        // بناء الرسالة النهائية
+        let msg = `*طلب صيانة جديد* 🛠️%0A`;
+        msg += `*التاريخ:* ${dateStr}%0A`;
+        msg += `*الساعة:* ${timeStr}%0A`;
+        msg += `--------------------------%0A`;
+        msg += `👤 *الزبون:* ${name}%0A`;
+        msg += `📞 *الهاتف:* ${phone}%0A`;
+        msg += `📱 *الجهاز:* ${device}%0A`;
+        msg += `⚠️ *العطل:* ${issue}%0A`;
+        msg += `📍 *العنوان:* ${addrManual || "مرفق في الرابط"}%0A`;
+        
+        if(finalMap) {
+            msg += `%0A🗺️ *رابط الموقع المباشر:*%0A${finalMap}`;
         }
 
-        function sendSticker(s) {
-            if(currentRoomId) {
-                db.ref('chats/'+currentRoomId).push({ u: auth.currentUser.displayName || "مستخدم", uid: auth.currentUser.uid, m: s, type: 'sticker' });
-                toggleStickers();
-            }
-        }
+        window.location.href = `https://api.whatsapp.com/send?phone=${whatsappNum}&text=${msg}`;
+    };
+</script>
 
-        function loadMsgs() {
-            db.ref('chats/'+currentRoomId).limitToLast(30).on('value', snap => {
-                const box = document.getElementById('msg-container'); box.innerHTML = "";
-                snap.forEach(c => {
-                    const d = c.val(), isMe = d.uid === auth.currentUser.uid;
-                    const isSticker = d.type === 'sticker';
-                    box.innerHTML += `<div class="bubble ${isMe?'me':'them'} ${isSticker?'sticker-msg':''}">${!isMe && !isSticker ? `<small style="color:#3498db;display:block;font-size:11px">${d.u}</small>` : ''}${d.m}</div>`;
-                });
-                box.scrollTop = box.scrollHeight;
-            });
-        }
-    </script>
 </body>
 </html>
